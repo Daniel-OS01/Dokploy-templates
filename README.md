@@ -1,225 +1,106 @@
 # Dokploy Open Source Templates
 
-This is the official repository for the Dokploy Open Source Templates.
+This is the official repository for creating Dokploy templates.
 
-### How to add a new template
+## Folder Structure
 
+The repository is organized into two main folders:
 
-1. Fork the repository
-2. Create a new branch
-3. Add the template to the `blueprints` folder (`docker-compose.yml`, `template.toml`)
-4. Add the template metadata (name, description, version, logo, links, tags) to the `meta.json` file
-5. Add the logo to the template folder
-6. Commit and push your changes
-7. Create a pull request (PR)
-8. Every PR will automatically deploy a preview of the template to Dokploy.
-9. if anyone want to test the template before merging it, you can enter to the preview URL in the PR description, and search the template, click on the Template Card, scroll down and then copy the BASE64 value, and paste in the advanced section of your compose service, in the Import section or optional you can use the preview URL and paste in the
-BASE URL when creating a template.
+-   `blueprints`: This folder contains examples of templates that you can use as a reference.
+-   `templates`: This is where you should add your custom templates.
 
-#### Optional
+Each template has its own directory within the `templates` folder, and the directory name should be the name of the application (e.g., `wordpress`, `ghost`).
 
-If you want to run the project locally, you can run the project with the following command:
+## How to Create a Dokploy Template: A Step-by-Step Guide
 
-```bash
-cd app
-pnpm install
-pnpm run dev
-go to http://localhost:5173/
-```
+To create a new Dokploy template, follow these steps:
 
-### Example
+### Step 1: Create a New Template Directory
 
-Let's suppose you want to add the [Grafana](https://grafana.com/) template to the repository.
+Create a new directory inside the `templates` folder. The name of the directory should be the name of the application you are creating a template for (e.g., `wordpress`).
 
-1. Create a new folder inside the `blueprints` folder named `grafana`
-2. Add the `docker-compose.yml` file to the folder
+### Step 2: Create the `docker-compose.yml` File
+
+Inside your new template directory, create a `docker-compose.yml` file. This file should be optimized for Dokploy and follow these requirements:
+
+-   **No `container_name`**: Remove all `container_name` properties.
+-   **No explicit networks**: Do not define any networks (e.g., `dokploy-network`).
+-   **Proper port exposure**: Use the format `"4000"` instead of `"4000:4000"`.
+-   **`restart: unless-stopped`**: All services must have this restart policy.
+-   **Use Alpine images**: Use Alpine-based images whenever possible.
+-   **Add healthchecks**: Add a comprehensive healthcheck for every service.
+
+### Step 3: Create the `template.yml` File
+
+Create a `template.yml` file in the same directory. This file contains the metadata for your template.
 
 ```yaml
-version: "3.8"
+name: <template_name>
+description: <template_description>
+logo: <logo_filename>
 services:
-  grafana:
-    image: grafana/grafana-enterprise:9.5.20
-    restart: unless-stopped
-    volumes:
-      - grafana-storage:/var/lib/grafana
-volumes:
-  grafana-storage: {}
+  <service_name_1>:
+    # ...
+  <service_name_2>:
+    # ...
+variables:
+  - id: <variable_id>
+    label: <variable_label>
+    defaultValue: <variable_defaultValue>
+notes: |
+  - <note_1>
+  - <note_2>
 ```
-3. Add the `template.toml` file to the folder, this is where we specify the domains, mounts and env variables, to understand more the structure of `template.toml` you can read here [Template.toml structure](#template.toml-structure)
+
+### Step 4: Create the `template.toml` File
+
+Create a `template.toml` file in the same directory. This file defines the variables and configuration for your template.
 
 ```toml
 [variables]
 main_domain = "${domain}"
+postgres_password = "${password:32}"
 
 [config]
 [[config.domains]]
-serviceName = "grafana"
-port = 3000
+serviceName = "litellm"
+port = 4000
 host = "${main_domain}"
 
-
-[config.env]
-
-[[config.mounts]]
-```
-4. Add meta information to the `meta.json` file in the root folder
-
-```json
-{
-  "id": "grafana",
-  "name": "Grafana",
-  "version": "9.5.20",
-  "description": "Grafana is an open source platform for data visualization and monitoring.",
-  "logo": "grafana.svg",
-  "links": {
-    "github": "https://github.com/grafana/grafana",
-    "website": "https://grafana.com/",
-    "docs": "https://grafana.com/docs/"
-  },
-  "tags": [
-    "monitoring"
-  ]
-},
-```
-5. Add the logo to the folder
-6. Commit and push your changes
-7. Create a pull request
-
-### Template.toml structure
-
-Dokploy use a defined structure for the `template.toml` file, we have 4 sections available:
-
-1. `variables`: This is where we define the variables that will be used in the `domains`, `env` and `mounts` sections.
-2. `domains`: This is where we define the configuration for the template.
-3. `env`: This is where we define the environment variables for the template.
-4. `mounts`: This is where we define the mounts for the template.
-
-- The `variables(Optional)` structure is the following:
-
-```toml
-[variables]
-main_domain = "${domain}"
-my_domain = "https://my-domain.com"
-my_password = "${password:32}"
-any_helper = "${you-can-use-any-helper}"
-```
-
-- The `config` structure is the following:
-
-```toml
-[config]
-# Optional sections below
-
-[[config.domains]]
-serviceName = "grafana" # Required
-port = 3000 # Required
-host = "${main_domain}" # Required
-path = "/" # Optional
-
+[[config.env]]
+serviceName = "db"
 env = [
-    "AP_HOST=${main_domain}",
-    "AP_API_KEY=${api_key}",
-    "AP_ENCRYPTION_KEY=${encryption_key}",
-    "AP_JWT_SECRET=${jwt_secret}",
-    "AP_POSTGRES_PASSWORD=${postgres_password}"
+    "POSTGRES_PASSWORD=${postgres_password}"
 ]
-
-[[config.mounts]]
-filePath = "/content/file.txt"
-content = """
-My content
-"""
 ```
 
-Important: you can reference any variable in the `domains`, `env` and `mounts` sections. just use the `${variable_name}` syntax, in the case you don't want to define a variable, you can use the `domain`, `base64`, `password`, `hash`, `uuid`, `randomPort`, `timestamp`, `jwt`, `email`, or `username` helpers.
+### Step 5: Generate the Base64-Encoded `template.toml`
 
-### Helpers
+Encode the `template.toml` file in Base64. You can use the following command:
 
-We have a few helpers that are very common when creating a template, these are:
-
-- `domain`: This is a helper that will generate a random domain for the template.
-- `base64 or base64:length`: This is a helper that will encode a string to base64 (lenght is the number of bytes to encode not the encoded string length).
-- `password or password:length`: This is a helper that will generate a random password for the template.
-- `hash or hash:length`: This is a helper that will generate a hash for the template
-- `uuid`: This is a helper that will generate a uuid for the template.
-- `randomPort`: This is a helper that will generate a random port for the template.
-- `email`: This is a helper that will generate a random email for the template.
-- `username`: This is a helper that will generate a random username in lowercase for the template.
-- `timestamp`: This is a helper that will generate a timestamp for "now" in milli-second.
-  - `timestampms or timestampms:datetime`: This is a helper that will generate a timestamp in milli-seconds.
-  - `timestamps or timestamps:datetime`: This is a helper that will generate a timestamp in seconds.
-  - `datetime` parameter for `timestamps/timestampms` helpers must be a valid value for javascript new Date() (ie: `timestamps:2030-01-01T00:00:00Z`)
-- `jwt`: This is a helper that will generate a jwt for the template.
-  - `jwt:length`: will generate a random hex string of bytes length. _This should not be used in newer templates_
-  - `jwt:secret_var_name`: will generate a jwt with some default values, secret var name should be the name of the variable holding the secret
-  - `jwt:secret_var_name:payload_var_name`: is the same as above but you can pass partial or full payload for the jwt.
-    Here's a full example
-    ```toml
-    [variables]
-    main_domain = "${domain}"
-    mysecret = "cQsdycq1hDLopQonF6jUTqgQc5WEZTwWLL02J6XJ"
-    mypayload = """
-    {
-      "role": "jwt-tester",
-      "iss": "dokploy-templates",
-      "exp": ${timestamps:2030-01-01T00:00:00Z}
-    }
-    """
-    jwt = "${jwt:mysecret:mypayload}"
-    ```
-
-
-
-## General Suggestions when creating a template
-
-- Don't use this way in your docker compose file:
-
-```yaml
-services:
-  grafana:
-    image: grafana/grafana-enterprise:9.5.20
-    restart: unless-stopped
-    ports:
-      - 3000:3000
-
-    # Instead use this way:
-    ports:
-      - 3000
+```bash
+cat template.toml | base64
 ```
 
-- Don't use this way in your template.toml file, make sure to use the same service name as the one in the docker compose file:
+### Step 6: Create the Default Compose Command
 
-```toml
-[config]
-[[config.domains]]
-serviceName = "MyGrafanaService"
-# Instead use this way:
-serviceName = "grafana" # Make sure to use the same service name as the one in the docker compose file
+Create a single-line bash command that does the following:
+
+-   Exports all necessary environment variables with demo values.
+-   Validates the `docker-compose.yml` file using `docker compose config`.
+-   Starts the services using `docker compose up -d`.
+-   Verifies the status of the services using `docker compose ps`.
+
+**Example:**
+
+```bash
+export MAIN_DOMAIN="servicename.example.com" REDIS_PASSWORD="$(openssl rand -base64 24)" && docker compose --file docker-compose.yml config && docker compose up -d && docker compose ps
 ```
 
-- Don't use container_name in your docker compose file, make sure to use the same service name as the one in the template.toml file:
+### Step 7: Add a Logo
 
-```yaml
-services:
-  grafana:
-    container_name: grafana # ❌ Remove this
-```
+Add a logo for your application to the template directory. The logo should be referenced in the `template.yml` file.
 
-- Don't use dokploy-network in your docker compose file, by default all the templates have this flag enabled https://docs.dokploy.com/docs/core/docker-compose/utilities#isolated-deployments, so by default they have a internal network created, so you don't to create a new one or use the dokploy-network name.
+### Step 8: Create a Pull Request
 
-```yaml
-services:
-  grafana:
-    networks:
-      - dokploy-network # ❌ Remove this or any other network defined
-```
-
-
-- Please before submit a PR, make sure to test the template in your instance, so the maintainers don't spend time trying to figure out what's wrong.
-
-1. Everytime you submit a PR, it will display a Preview Link.
-2. Enter to the Preview Link and search the template you've submitted.
-3. Click on the Template Card, and click the Copy Button in the Base64 Configuration.
-4. Go to your instance, create a new Compose Service, go to Advanced Section -> Scroll Down -> Import Section -> Paste the Base64 Value -> Click on the Import Button
-5. If everything is correct and set, you should see a modal with all the details (Compose File, Environment Variables, Mounts, Domains, etc)
-6. Now you can click on the Deploy Button and wait for the deployment to finish, and try to access to the service, if everything is correct you should access to the service and see the template working.
+Once you have created all the necessary files, create a pull request to have your template reviewed and added to the repository.

@@ -1,0 +1,202 @@
+name: LiteLLM
+description: "LiteLLM is a lightweight and powerful tool for interacting with large language models (LLMs). It provides a unified interface for various LLMs, including OpenAI, Cohere, and AI21 Studio. With LiteLLM, you can easily switch between different models without changing your code. It's designed to be simple, flexible, and efficient, making it an ideal choice for developers who want to build applications on top of LLMs."
+logo: logo.png
+services:
+  litellm:
+    image: ghcr.io/berriai/litellm:main-v1.16.2
+    command: --host 0.0.0.0 --port 4000 --config /app/config.yaml
+    volumes:
+      - ./config.tmp.yaml:/app/config.yaml
+    ports:
+      - 4000:4000
+variables:
+  - id: OPENAI_API_KEY
+    label: OpenAI API Key
+    defaultValue: ""
+  - id: COHERE_API_KEY
+    label: Cohere API Key
+    defaultValue: ""
+  - id: ANTHROPIC_API_KEY
+    label: Anthropic API Key
+    defaultValue: ""
+  - id: HUGGINGFACE_API_KEY
+    label: Hugging Face API Key
+    defaultValue: ""
+  - id: REPLICATE_API_KEY
+    label: Replicate API Key
+    defaultValue: ""
+  - id: AI21_API_KEY
+    label: AI21 API Key
+    defaultValue: ""
+  - id: PALM_API_KEY
+    label: Palm API Key
+    defaultValue: ""
+  - id: GEMINI_API_KEY
+    label: Gemini API Key
+    defaultValue: ""
+  - id: AZURE_API_KEY
+    label: Azure API Key
+    defaultValue: ""
+  - id: AZURE_API_BASE
+    label: Azure API Base
+    defaultValue: ""
+  - id: AZURE_API_VERSION
+    label: Azure API Version
+    defaultValue: ""
+  - id: BEDROCK_AWS_ACCESS_KEY_ID
+    label: Bedrock AWS Access Key ID
+    defaultValue: ""
+  - id: BEDROCK_AWS_SECRET_ACCESS_KEY
+    label: Bedrock AWS Secret Access Key
+    defaultValue: ""
+  - id: BEDROCK_AWS_REGION_NAME
+    label: Bedrock AWS Region Name
+    defaultValue: ""
+  - id: SAGE_MAKER_AWS_ACCESS_KEY_ID
+    label: SageMaker AWS Access Key ID
+    defaultValue: ""
+  - id: SAGE_MAKER_AWS_SECRET_ACCESS_KEY
+    label: SageMaker AWS Secret Access Key
+    defaultValue: ""
+  - id: SAGE_MAKER_AWS_REGION_NAME
+    label: SageMaker AWS Region Name
+    defaultValue: ""
+  - id: VERTEX_AI_PROJECT
+    label: Vertex AI Project
+    label: Vertex AI Location
+    defaultValue: ""
+  - id: VERTEX_AI_CREDENTIALS
+    label: Vertex AI Credentials
+    defaultValue: ""
+  - id: CUSTOM_API_KEY
+    label: Custom API Key
+    defaultValue: ""
+  - id: CUSTOM_API_BASE
+    label: Custom API Base
+    defaultValue: ""
+  - id: CUSTOM_API_MODEL_NAME
+    label: Custom API Model Name
+    defaultValue: ""
+  - id: CUSTOM_API_VERSION
+    label: Custom API Version
+    defaultValue: ""
+  - id: CUSTOM_API_HEADER
+    label: Custom API Header
+    defaultValue: ""
+  - id: CUSTOM_API_PROMPT_TEMPLATE
+    label: Custom API Prompt Template
+    defaultValue: ""
+  - id: CUSTOM_API_MAX_TOKENS
+    label: Custom API Max Tokens
+    defaultValue: ""
+  - id: CUSTOM_API_TEMPERATURE
+    label: Custom API Temperature
+    defaultValue: ""
+  - id: CUSTOM_API_TOP_P
+    label: Custom API Top P
+    defaultValue: ""
+  - id: CUSTOM_API_FREQUENCY_PENALTY
+    label: Custom API Frequency Penalty
+    defaultValue: ""
+  - id: CUSTOM_API_PRESENCE_PENALTY
+    label: Custom API Presence Penalty
+    defaultValue: ""
+  - id: CUSTOM_API_STOP
+    label: Custom API Stop
+    defaultValue: ""
+  - id: CUSTOM_API_N
+    label: Custom API N
+    defaultValue: ""
+  - id: CUSTOM_API_STREAM
+    label: Custom API Stream
+    defaultValue: ""
+  - id: CUSTOM_API_LOGIT_BIAS
+    label: Custom API Logit Bias
+    defaultValue: ""
+  - id: CUSTOM_API_ECHO
+    label: Custom API Echo
+    defaultValue: ""
+  - id: CUSTOM_API_BEST_OF
+    label: Custom API Best Of
+    defaultValue: ""
+  - id: CUSTOM_API_LOGPROBS
+    label: Custom API Logprobs
+    defaultValue: ""
+  - id: CUSTOM_API_SUFFIX
+    label: Custom API Suffix
+    defaultValue: ""
+  - id: CUSTOM_API_MAX_RETRIES
+    label: Custom API Max Retries
+    defaultValue: ""
+  - id: CUSTOM_API_TIMEOUT
+    label: Custom API Timeout
+    defaultValue: ""
+  - id: CUSTOM_API_HEADERS
+    label: Custom API Headers
+    defaultValue: ""
+  - id: CUSTOM_API_DEFAULT_MODEL
+    label: Custom API Default Model
+    defaultValue: ""
+  - id: CUSTOM_API_DEFAULT_MAX_TOKENS
+    label: Custom API Default Max Tokens
+    defaultValue: ""
+  - id: CUSTOM_API_DEFAULT_TEMPERATURE
+    label: Custom API Default Temperature
+    defaultValue: ""
+  - id: CUSTOM_API_DEFAULT_TOP_P
+    label: Custom API Default Top P
+    defaultValue: ""
+  - id: CUSTOM_API_DEFAULT_FREQUENCY_PENALTY
+    label: Custom API Default Frequency Penalty
+    defaultValue: ""
+  - id: CUSTOM_API_DEFAULT_PRESENCE_PENALTY
+    label: Custom API Default Presence Penalty
+    defaultValue: ""
+  - id: CUSTOM_API_DEFAULT_STOP
+    label: Custom API Default Stop
+    defaultValue: ""
+  - id: CUSTOM_API_DEFAULT_N
+    label: Custom API Default N
+    defaultValue: ""
+  - id: CUSTOM_API_DEFAULT_STREAM
+    label: Custom API Default Stream
+    defaultValue: ""
+  - id: CUSTOM_API_DEFAULT_LOGIT_BIAS
+    label: Custom API Default Logit Bias
+    defaultValue: ""
+  - id: CUSTOM_API_DEFAULT_ECHO
+    label: Custom API Default Echo
+    defaultValue: ""
+  - id: CUSTOM_API_DEFAULT_BEST_OF
+    label: Custom API Default Best Of
+    defaultValue: ""
+  - id: CUSTOM_API_DEFAULT_LOGPROBS
+    label: Custom API Default Logprobs
+    defaultValue: ""
+  - id: CUSTOM_API_DEFAULT_SUFFIX
+    label: Custom API Default Suffix
+    defaultValue: ""
+  - id: CUSTOM_API_DEFAULT_MAX_RETRIES
+    label: Custom API Default Max Retries
+    defaultValue: ""
+  - id: CUSTOM_API_DEFAULT_TIMEOUT
+    label: Custom API Default Timeout
+    defaultValue: ""
+  - id: CUSTOM_API_DEFAULT_HEADERS
+    label: Custom API Default Headers
+    defaultValue: ""
+notes: |
+  - LiteLLM is a lightweight and powerful tool for interacting with large language models (LLMs).
+  - It provides a unified interface for various LLMs, including OpenAI, Cohere, and AI21 Studio.
+  - With LiteLLM, you can easily switch between different models without changing your code.
+  - It's designed to be simple, flexible, and efficient, making it an ideal choice for developers who want to build applications on top of LLMs.
+  - For more information, visit the [LiteLLM website](https://litellm.ai/).
+  - You can also check out the [LiteLLM GitHub repository](https://github.com/BerriAI/litellm).
+  - The default port is 4000.
+  - The default config file is `/app/config.yaml`.
+  - You can mount a custom config file to `/app/config.yaml`.
+  - You can also set the config file path using the `--config` flag.
+  - For example, `litellm --host 0.0.0.0 --port 4000 --config /app/config.yaml`.
+  - You can also set the config using environment variables.
+  - For example, `export OPENAI_API_KEY=your-api-key`.
+  - For more information on how to use LiteLLM, please refer to the [official documentation](https://docs.litellm.ai/docs/).
