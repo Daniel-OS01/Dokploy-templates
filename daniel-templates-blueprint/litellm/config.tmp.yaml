@@ -1,0 +1,51 @@
+# config.yaml
+
+# This is a sample config file for LiteLLM Proxy
+# Find all settings here: https://docs.litellm.ai/docs/proxy/config
+
+# [OPTIONAL] Model List - All models you want to make available on the proxy
+# Find list of supported models here: https://docs.litellm.ai/docs/providers
+model_list:
+  - model_name: gpt-3.5-turbo
+    litellm_params:
+      model: openai/gpt-3.5-turbo
+      api_key: sk-1234 # required
+  - model_name: gpt-4
+    litellm_params:
+      model: openai/gpt-4
+      api_key: sk-1234 # required
+  - model_name: text-embedding-ada-002
+    litellm_params:
+      model: openai/text-embedding-ada-002
+      api_key: sk-1234 # required
+  - model_name: dall-e-2
+    litellm_params:
+      model: openai/dall-e-2
+      api_key: sk-1234 # required
+
+# [OPTIONAL] LiteLLM General Settings
+# Find all settings here: https://docs.litellm.ai/docs/proxy/config
+litellm_settings:
+  # set to 'DEBUG' to see detailed logs
+  set_verbose: False
+  # [OPTIONAL] fallbacks for models
+  fallbacks:
+    - "gpt-3.5-turbo": ["gpt-4"]
+  # [OPTIONAL] drop params
+  drop_params: True
+  # [OPTIONAL] add custom headers to upstream request
+  add_function_to_prompt: False
+
+# [OPTIONAL] LiteLLM DB Settings
+# This is required for Spend Tracking, Key Management, User Management
+# Find all settings here: https://docs.litellm.ai/docs/proxy/virtual_keys
+database_settings:
+    # database_url (e.g. 'postgres://user:password@host:port/db')
+    database_url: "postgresql://llmproxy:dbpassword9090@db:5432/litellm"
+
+# [OPTIONAL] Redis Cache
+# This is required for Caching, Rate Limiting, and more
+# Find all settings here: https://docs.litellm.ai/docs/caching/redis_cache
+redis_settings:
+  # redis_url (e.g. 'redis://user:password@host:port')
+  redis_url: "redis://redis:6379"
