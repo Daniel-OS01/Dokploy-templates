@@ -81,8 +81,8 @@ const TemplateGrid: React.FC<TemplateGridProps> = ({ view }) => {
     setModalLoading(true);
     try {
       const [dockerComposeRes, configRes] = await Promise.all([
-        fetch(`/templates/${templateId}/docker-compose.yml`),
-        fetch(`/templates/${templateId}/template.toml`),
+        fetch(`/blueprints/${templateId}/docker-compose.yml`),
+        fetch(`/blueprints/${templateId}/template.toml`),
       ]);
 
       const dockerCompose = dockerComposeRes.ok
@@ -190,7 +190,7 @@ const TemplateGrid: React.FC<TemplateGridProps> = ({ view }) => {
                   })}
                 >
                   <img
-                    src={`/templates/${template.id}/${template.logo}`}
+                    src={`/blueprints/${template.id}/${template.logo}`}
                     alt={template.name}
                     className={cn("w-auto h-12 s object-contain mb-2", {
                       "w-auto h-12": view === "grid",
