@@ -4,7 +4,12 @@ This document provides instructions for an AI LLM on how to adapt any `docker-co
 
 ## 1. Understand the Goal
 
-The primary goal is to convert a standard `docker-compose.yml` file into a Dokploy template, which consists of a `docker-compose.yml` file and a `template.yml` file. The `template.yml` file provides metadata and configuration options for the template.
+The primary goal is to convert a standard `docker-compose.yml` file into a Dokploy template, which consists of four outputs:
+
+1.  **Docker Compose File**: A `docker-compose.yml` file optimized for Dokploy.
+2.  **Default Compose Command**: A single-line bash command to set up and run the template.
+3.  **Template Configuration (Base64)**: A Base64-encoded `template.toml` file.
+4.  **`template.yml`**: A YAML file containing the template's metadata.
 
 ## 2. Analyze the `docker-compose.yml` File
 
@@ -15,8 +20,20 @@ The primary goal is to convert a standard `docker-compose.yml` file into a Dokpl
 - **Environment Variables**: Identify the environment variables for each service.
 - **Dependencies**: Note any dependencies between services (`depends_on`).
 - **Commands**: Note any custom commands (`command`).
+- **Healthchecks**: Add a comprehensive healthcheck for every service.
 
-## 3. Create the `template.yml` File
+## 3. Create the Dokploy Template Files
+
+### 3.1. `docker-compose.yml`
+
+-   **No `container_name`**: Remove all `container_name` properties.
+-   **No explicit networks**: Do not define any networks (e.g., `dokploy-network`).
+-   **Proper port exposure**: Use the format `"4000"` instead of `"4000:4000"`.
+-   **`restart: unless-stopped`**: All services must have this restart policy.
+-   **Use Alpine images**: Use Alpine-based images whenever possible.
+-   **Add healthchecks**: Add a comprehensive healthcheck for every service.
+
+### 3.2. `template.yml`
 
 Create a `template.yml` file with the following structure:
 
@@ -38,45 +55,39 @@ notes: |
   - <note_2>
 ```
 
-### 3.1. `name`, `description`, and `logo`
+### 3.3. `template.toml`
 
-- **`name`**: A user-friendly name for the template (e.g., "WordPress", "Ghost").
-- **`description`**: A brief, user-friendly description of the application.
-- **`logo`**: The filename of the logo image (e.g., `logo.png`, `logo.svg`).
+Create a `template.toml` file with the following sections:
 
-### 3.2. `services`
+-   **`variables`**: Define all the variables used in the template.
+-   **`config.domains`**: Define the domains for the services.
+-   **`config.env`**: Define the environment variables for the services.
+-   **`config.mounts`**: Define the volume mounts for the services.
 
-- For each service in the `docker-compose.yml` file, create a corresponding entry under `services` in the `template.yml` file.
-- The service name in `template.yml` **must** match the service name in `docker-compose.yml`.
-- Include the following information for each service, if applicable:
-    - `image`: The Docker image.
-    - `command`: The command to run.
-    - `volumes`: The volume mappings.
-    - `ports`: The port mappings.
-    - `depends_on`: The service dependencies.
+### 3.4. Default Compose Command
 
-### 3.3. `variables`
+Provide a single-line bash command that does the following:
 
-- Identify which environment variables in the `docker-compose.yml` file should be user-configurable. These are typically things like database passwords, API keys, and domain names.
-- For each configurable environment variable, create a corresponding entry under `variables` in the `template.yml` file.
-- **`id`**: The name of the environment variable (e.g., `WORDPRESS_DB_PASSWORD`).
-- **`label`**: A user-friendly label for the variable (e.g., "WordPress Database Password").
-- **`defaultValue`**: A default value for the variable. You can use helpers like `${password:16}` to generate a random password.
+-   Exports all necessary environment variables with demo values.
+-   Validates the `docker-compose.yml` file using `docker compose config`.
+-   Starts the services using `docker compose up -d`.
+-   Verifies the status of the services using `docker compose ps`.
 
-### 3.4. `notes`
+**Example:**
 
-- Provide any important information or instructions for the user in the `notes` section. This could include:
-    - Default login credentials.
-    - Links to documentation.
-    - Any post-installation steps.
+```bash
+export MAIN_DOMAIN="servicename.example.com" REDIS_PASSWORD="$(openssl rand -base64 24)" && docker compose --file docker-compose.yml config && docker compose up -d && docker compose ps
+```
 
 ## 4. Review and Refine
 
-- **Consistency**: Ensure that service names, volume names, and environment variable names are consistent between the `docker-compose.yml` and `template.yml` files.
+- **Consistency**: Ensure that service names, volume names, and environment variable names are consistent between the `docker-compose.yml`, `template.yml` and `template.toml` files.
 - **Clarity**: The `template.yml` file should be easy for users to understand and configure. Use clear and descriptive labels for variables.
 - **Simplicity**: Only expose the most important and frequently changed options as variables. Avoid overwhelming the user with too many choices.
 - **Security**: Use secure defaults for passwords and other sensitive information. Use helpers like `${password:16}` to generate random values.
-- **Best Practices**: Follow the general suggestions in the main `README.md` file, such as not using `container_name` or `dokploy-network`.
+- **Best Practices**: Follow the general suggestions in the main `README.md` file.
+- **Logo**: Ensure a logo is included for the template and referenced correctly in the `template.yml` file.
+- **Service Names**: Make sure the service names in the `docker-compose.yml` file match the service names in the `template.yml` and `template.toml` files.
 
 ## Example: Converting a `docker-compose.yml` for WordPress
 
@@ -118,28 +129,37 @@ volumes:
 version: '3.8'
 services:
   db:
-    image: mysql:8.0
+    image: mysql:8.0-alpine
     command: '--default-authentication-plugin=mysql_native_password'
     volumes:
       - db_data:/var/lib/mysql
-    restart: always
+    restart: unless-stopped
     environment:
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
       MYSQL_DATABASE: wordpress
       MYSQL_USER: wordpress
       MYSQL_PASSWORD: ${WORDPRESS_DB_PASSWORD}
+    healthcheck:
+      test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost"]
+      timeout: 20s
+      retries: 10
   wordpress:
     depends_on:
       - db
     image: wordpress:latest
     ports:
       - 80
-    restart: always
+    restart: unless-stopped
     environment:
       WORDPRESS_DB_HOST: db:3306
       WORDPRESS_DB_USER: wordpress
       WORDPRESS_DB_PASSWORD: ${WORDPRESS_DB_PASSWORD}
       WORDPRESS_DB_NAME: wordpress
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
 volumes:
     db_data: {}
 ```
@@ -152,7 +172,7 @@ description: "WordPress is a free and open-source content management system writ
 logo: logo.svg
 services:
   db:
-    image: mysql:8.0
+    image: mysql:8.0-alpine
     command: '--default-authentication-plugin=mysql_native_password'
     volumes:
       - db_data:/var/lib/mysql
@@ -172,4 +192,32 @@ variables:
 notes: |
   - After installation, navigate to the provided URL to complete the WordPress setup.
   - The default database name is `wordpress` and the user is `wordpress`.
+```
+
+**New `template.toml`:**
+
+```toml
+[variables]
+main_domain = "${domain}"
+mysql_root_password = "${password:32}"
+wordpress_db_password = "${password:32}"
+
+[config]
+[[config.domains]]
+serviceName = "wordpress"
+port = 80
+host = "${main_domain}"
+
+[[config.env]]
+serviceName = "db"
+env = [
+    "MYSQL_ROOT_PASSWORD=${mysql_root_password}",
+    "WORDPRESS_DB_PASSWORD=${wordpress_db_password}"
+]
+```
+
+**Default Compose Command:**
+
+```bash
+export MAIN_DOMAIN="wordpress.example.com" MYSQL_ROOT_PASSWORD="$(openssl rand -base64 24)" WORDPRESS_DB_PASSWORD="$(openssl rand -base64 24)" && docker compose --file docker-compose.yml config && docker compose up -d && docker compose ps
 ```

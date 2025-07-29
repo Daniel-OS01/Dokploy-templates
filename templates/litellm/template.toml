@@ -1,0 +1,15 @@
+[variables]
+main_domain = "${domain}"
+postgres_password = "${password:32}"
+
+[config]
+[[config.domains]]
+serviceName = "litellm"
+port = 4000
+host = "${main_domain}"
+
+[[config.env]]
+serviceName = "db"
+env = [
+    "POSTGRES_PASSWORD=${postgres_password}"
+]
